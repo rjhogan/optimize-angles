@@ -19,7 +19,6 @@ OUTFILEx3 = $(OUTBASE)-ratio3.nc
 
 REF=quadrature/quadrature_gauss-jacobi-5.nc
 all:
-		"orders=1 2 3 4 5 6 7 8 10 12 14 16" \
 
 check: run
 run: run_angles
