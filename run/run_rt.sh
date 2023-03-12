@@ -16,5 +16,5 @@ mkdir -p fluxes
 for ORDER in $@
 do
   OUTFILE=fluxes/${TAG}_${QUADRATURE}_${ORDER}_fluxes.nc
-  $EXE "$INFILE" quadrature_${QUADRATURE}.nc "$ORDER" "$OUTFILE"
+  $EXE "$INFILE" quadrature/quadrature_${QUADRATURE}.nc "$ORDER" "$OUTFILE"
 done

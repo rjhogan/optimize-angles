@@ -1,7 +1,7 @@
-quads = {'gauss-legendre','gauss-laguerre','gauss-jacobi-5','optimized-fw0.02','optimized-fw0.02-ratio4'};
+quads = {'gauss-legendre','gauss-laguerre','gauss-jacobi-5','optimized-default'};
 only_two = [0 0 0 0 1];
 for iq = 1:length(quads)
-  quadrature{iq} = loadnc(['../run/quadrature_' quads{iq} '.nc']);
+  quadrature{iq} = loadnc(['../run/quadrature/quadrature_' quads{iq} '.nc']);
 end
 cols = ['kbrgc'];
 clf

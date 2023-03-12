@@ -2,14 +2,14 @@ directory='../run';
 dataset='evaluation2';
 scenario='present';
 supspace = ' '; % Fix bad PDF rendering in some Matlab installations
-input_file = [directory '/ecckd-1.0_' dataset '_lw_climate_fsck-32b_optical-depth_' scenario '.nc'];
-ref_file = [directory '/' dataset '_gauss-jacobi-5_64_fluxes.nc'];
+input_file = [directory '/optical-depth/ecckd-1.0_' dataset '_lw_climate_fsck-32b_optical-depth_' scenario '.nc'];
+ref_file = [directory '/fluxes/' dataset '_gauss-jacobi-5_64_fluxes.nc'];
 quadratures = {'gauss-legendre','gauss-laguerre','gauss-jacobi-5',...
-	       'optimized-fw0.02','lacis'};%,'elsasser'};%,'optimized-fw0.02-ratio3'};
-is_ratio=[0 0 0 0 0];
-is_one  =[0 0 0 0 3];
-leg = {'Gauss-Legendre','Gauss-Laguerre','Gauss-Jacobi 5','Optimized','Lacis',...
-       'Optimized-ratio3','Optimized-ratio4'};
+	       'optimized-default','elsasser','lacis'};
+is_ratio=[0 0 0 0 0 0];
+is_one  =[0 0 0 0 1 3];
+leg = {'Gauss-Legendre','Gauss-Laguerre','Gauss-Jacobi 5','Optimized',...
+       'Elsasser','Lacis'};
 
 in = loadnc(input_file);
 ref= loadnc(ref_file);
@@ -47,7 +47,7 @@ for iquad = 1:length(quadratures)
   %end
   streams{iquad} = orders.*2;
   for iord = 1:length(orders)
-    file = [directory '/' dataset '_' quadratures{iquad} '_' ...
+    file = [directory '/fluxes/' dataset '_' quadratures{iquad} '_' ...
 		      num2str(orders(iord)) '_fluxes.nc'];
     data = loadnc(file);
     % Error variances
@@ -152,13 +152,13 @@ gg=[0.25 0.25 0.25;
     1 0 0;
     0 1 0;
     0 1 1];
-cols = {'k','b','r','g','m--','c'};
+cols = {'k','b','r','g','m--','c--','y'};
 
 figure(2)
 clf
 set(gcf,'paperposition',[0.5 0.5 32 10]);
 xspan = [1 0.2 0.05];
-reorder = [1 3 4 2 5];
+reorder = [1 3 4 2 5 6];
 set(gcf,'defaultlinelinewidth',1.5);
 for io = 1:3
   subplot(1,3,io)
@@ -207,7 +207,7 @@ for io = 1:3
   xlabel('Heating rate bias (K/d)');
   ylabel('Pressure (hPa)')
   if io == 1
-    legend('Legendre','Laguerre','Jacobi 5','Optimized','Elsasser','location','southeast')
+    legend('Legendre','Laguerre','Jacobi 5','Optimized','Elsasser','Lacis','location','southeast')
   end
   set(gca,'yminorgrid','off','layer','top')
   set(gca,'Xticklabelrotationmode','manual')

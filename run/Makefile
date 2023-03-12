@@ -9,8 +9,9 @@ FLUXWEIGHT=0.02
 
 # Type "make TAG=xxx check" to use a different tag for output files
 TAG = default
+OPTTAG = optimized-$(TAG)
 
-OUTBASE = quadrature/quadrature_optimized-$(TAG)
+OUTBASE = quadrature/quadrature_$(OPTTAG)
 OUTFILE = $(OUTBASE).nc
 LOGFILE = $(OUTBASE).log
 
@@ -57,12 +58,14 @@ run_rt_gauss:
 
 ANGLES_OPT="1 2 3 4 5 6 7 8 10 12 14 16"
 run_rt_opt:
-	./run_rt.sh $(RT) evaluation1 $(INFILE1) $(TAG) $(ANGLES_OPT)
-	./run_rt.sh $(RT) evaluation2 $(INFILE2) $(TAG) $(ANGLES_OPT)
-	./run_rt.sh $(RT) evaluation1 $(INFILE1) $(TAG)-ratio4 2
-	./run_rt.sh $(RT) evaluation2 $(INFILE2) $(TAG)-ratio4 2
-	./run_rt.sh $(RT) evaluation1 $(INFILE1) $(TAG)-ratio3 2
-	./run_rt.sh $(RT) evaluation2 $(INFILE2) $(TAG)-ratio3 2
+	./run_rt.sh $(RT) evaluation1 $(INFILE1) $(OPTTAG) $(ANGLES_OPT)
+	./run_rt.sh $(RT) evaluation2 $(INFILE2) $(OPTTAG) $(ANGLES_OPT)
+
+run_rt_opt_ratio:
+	./run_rt.sh $(RT) evaluation1 $(INFILE1) $(OPTTAG)-ratio4 2
+	./run_rt.sh $(RT) evaluation2 $(INFILE2) $(OPTTAG)-ratio4 2
+	./run_rt.sh $(RT) evaluation1 $(INFILE1) $(OPTTAG)-ratio3 2
+	./run_rt.sh $(RT) evaluation2 $(INFILE2) $(OPTTAG)-ratio3 2
 
 run_rt_elsasser:
 	./run_rt.sh $(RT) evaluation1 $(INFILE1) elsasser 1
@@ -71,6 +74,10 @@ run_rt_elsasser:
 run_rt_lacis:
 	./run_rt.sh $(RT) evaluation1 $(INFILE1) lacis 3
 	./run_rt.sh $(RT) evaluation2 $(INFILE2) lacis 3
+
+run_rt_riemann_midpoint:
+	./run_rt.sh $(RT) evaluation1 $(INFILE1) riemann-midpoint $(ANGLES_OPT)
+	./run_rt.sh $(RT) evaluation2 $(INFILE2) riemann-midpoint $(ANGLES_OPT)
 
 clean: clean_fluxes clean_quadratures
 
