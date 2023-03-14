@@ -41,6 +41,13 @@ run_angles_x3: $(OPT_ANGLES)
 		ref_quadrature=$(REF) init_quadrature=$(REF) \
 		$(INFILE1) $(OUTFILEx3)
 
+run_angles_prior: $(OPT_ANGLES)
+	$(OPT_ANGLES) flux_weight=$(FLUXWEIGHT) broadband_weight=0 \
+		"orders=1 2 3 4" \
+		ref_quadrature=$(REF) init_quadrature=$(REF) \
+		prior_quadrature=$(REF) prior_weight="0.001" \
+		$(INFILE1) $(OUTBASE)-prior.nc
+
 run_transmission: $(OPT_TRANSMISSION)
 	$(OPT_TRANSMISSION) > opt.txt
 

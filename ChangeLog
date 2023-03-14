@@ -1,2 +1,5 @@
+version 0.2
+	- Added prior_quadrature and prior_weight options
+	
 version 0.1 (8 March 2023)
 	- First git version

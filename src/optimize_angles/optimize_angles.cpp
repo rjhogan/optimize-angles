@@ -161,6 +161,42 @@ main(int argc, const char** argv)
     use_init_quad = true;
   }
 
+  std::string prior_quadrature;
+  intVector prior_orders;
+  Matrix prior_mu;
+  Matrix prior_wt;
+  bool use_prior_quad = false;
+  if (config.read(prior_quadrature, "prior_quadrature")) {
+    DataFile prior_quad(prior_quadrature);
+    prior_quad.read(prior_orders, "order");
+    prior_quad.read(prior_mu, "mu");
+    prior_quad.read(prior_wt, "weight");
+    use_prior_quad = true;
+  }
+
+  Vector prior_weight;
+  if (use_prior_quad) {
+    if (!config.read(prior_weight, "prior_weight")) {
+      ERROR << "prior_quadrature must be accompanied by prior_weight";
+      THROW(PROCESSING_ERROR);
+    }
+    if (prior_weight.size() == 1 && orders.size() > 1) {
+      // If user provides only a single prior weight, expand it up to
+      // the number of orders to be used
+      Real pw = prior_weight(0);
+      prior_weight.resize(orders.size());
+      prior_weight = pw;
+    }
+    else if (prior_weight.size() != orders.size()) {
+      ERROR << "prior_weight must be same size as orders";
+      THROW(PROCESSING_ERROR);
+    }
+  }
+  else {
+    prior_weight.resize(orders.size());
+    prior_weight = 0.0;
+  }
+  
   Vector y_ref((nlayer+2)*ncol+2);
   // Soft links to y_ref
   Matrix heating_rate_ref = y_ref(range(0,ncol*nlayer-1)).reshape(nlayer,ncol);
@@ -216,8 +252,8 @@ main(int argc, const char** argv)
   // calculations
   std::cout << "Processing quadrature orders from highest to lowest for most efficient use of parallel threads\n";
 #pragma omp parallel for schedule(dynamic,1)
-  for (int iangs = norder-1; iangs >= 0; --iangs) {
-    int iorder = orders(iangs);
+  for (int iang = norder-1; iang >= 0; --iang) {
+    int iorder = orders(iang);
 
 #pragma omp critical
     {
@@ -256,6 +292,18 @@ main(int argc, const char** argv)
     else {
       nx = iorder*2-1;
     }
+
+    if (prior_weight(iang) > 0.0) {
+      intVector ordindex = find(prior_orders == iorder);
+      if (ordindex.empty()) {
+	ERROR << "Quadrature order " << iorder << " not found in " << prior_quadrature;
+	THROW(PARAMETER_ERROR);
+      }
+      int iord = ordindex(0);
+      opt_problem.set_prior(prior_weight(iang), prior_mu(iord,range(0,iorder-1)),
+			    prior_wt(iord,range(0,iorder-1)));
+    }
+
     Vector x(nx);
     // soft links
     Vector mu;
@@ -332,8 +380,8 @@ main(int argc, const char** argv)
       std::cout << "\n";
     }
 
-    mu_save(iangs,range(0,iorder-1)) = mu;
-    wt_save(iangs,range(0,iorder-1)) = wt;
+    mu_save(iang,range(0,iorder-1)) = mu;
+    wt_save(iang,range(0,iorder-1)) = wt;
 
     if (save_fluxes) {
       std::stringstream ss;

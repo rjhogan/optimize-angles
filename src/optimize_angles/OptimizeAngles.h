@@ -26,6 +26,12 @@ public:
 
   void set_integer_ratio(int ratio) { integer_ratio = ratio; }
 
+  void set_prior(Real prior_weight_, Vector prior_mu_, Vector prior_wt_) {
+    prior_weight = prior_weight_;
+    prior_mu     = prior_mu_;
+    prior_wt     = prior_wt_;
+  }
+  
   // Split state vector into cosine of zenith angles, mu, and weights,
   // wt. The final value of wt must be computed for energy
   // conservation given that sum(wt*mu)=0.5.
@@ -76,6 +82,10 @@ public:
     //    LOG << "yref=" << y_ref << "\n";
     //    LOG << "y=" << y << "\n";
     typename internal::active_scalar<Real,IsActive>::type cost = 0.5*sum(dy*dy*weight);
+    if (prior_weight > 0.0) {
+      cost += prior_weight * sum((mu-prior_mu)*(mu-prior_mu)
+				      +(wt-prior_wt)*(wt-prior_wt));
+    }
     return cost;
   }
 
@@ -124,4 +134,9 @@ private:
   int nangles;
   int iverbose = 1;
   int integer_ratio = -1;
+
+  // Prior values of nodes and corresponding weights
+  Vector prior_mu, prior_wt;
+  // Weight of prior term in cost function
+  Real prior_weight = 0.0;
 };
