@@ -6,7 +6,6 @@ set -ex
 
 # Default (optimized) settings
 CXXFLAGS="-Wall -g -O2 -march=native -std=c++11 -DADEPT_FAST_EXPONENTIAL"
-CXXFLAGS="-Wall -g -O3 -march=native -std=c++11 -DADEPT_STORAGE_THREAD_SAFE"
 
 # Optimized but with checking
 #CXXFLAGS="-Wall -g -O2 -march=native -std=c++11 -DADEPT_BOUNDS_CHECKING -DADEPT_INIT_REAL_SNAN -DADEPT_STORAGE_THREAD_SAFE"
@@ -23,10 +22,8 @@ ADEPT_FLAGS="--with-adept=$ADEPT_DIR"
 module load netcdf4
 NETCDF_FLAGS="--with-netcdf=$NETCDF4_DIR"
 
-#LDFLAGS=-Wl,-rpath,/usr/local/apps/szip/2.1/LP64/lib64
-
 # Set install location
-INSTALL_DIR=/var/tmp/$HOME/fsck
+INSTALL_DIR=/var/tmp/$USER/optimize_angles
 
 # Call configure script
 ./configure --prefix "$INSTALL_DIR" "CXXFLAGS=$CXXFLAGS" $ADEPT_FLAGS $NETCDF_FLAGS "LDFLAGS=$LDFLAGS" $@

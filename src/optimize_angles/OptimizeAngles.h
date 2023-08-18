@@ -24,7 +24,15 @@ public:
 
   void set_verbose(int iverb) { iverbose = iverb; }
 
-  void set_integer_ratio(int ratio) { integer_ratio = ratio; }
+  void set_integer_ratios(intVector ratios) {
+    integer_ratios = ratios;
+    if (any(integer_ratios <= 1)) {
+      ERROR << "User-specified integer ratios must all be more than 1";
+      THROW(PARAMETER_ERROR);
+    }
+    LOG << "The second and subsequent angles are the following multiples of the first: "
+	<< integer_ratios << "\n";
+  }
 
   void set_prior(Real prior_weight_, Vector prior_mu_, Vector prior_wt_) {
     prior_weight = prior_weight_;
@@ -40,10 +48,22 @@ public:
 			  Array<1,Real,IsActive>& mu,
 			  Array<1,Real,IsActive>& wt) {
     mu = x(range(0,nangles-1));
+    /*
     if (nangles == 2 && integer_ratio > 1) {
       mu(1) = mu(0)*integer_ratio;
       wt(0) = x(1);
       wt(1) = (0.5-wt(0)*mu(0))/mu(1);
+    }
+    */
+    if (nangles > 1 && !integer_ratios.empty()) {
+      // Only the first angle is in the state vector - the others are
+      // scaled from the first
+      //mu(range(1,nangles-1)) = min(mu(0) * integer_ratios, 1.0);
+      mu(range(1,nangles-1)) = integer_ratios;
+      //mu(1) = 3.7529;
+      mu(range(1,nangles-1)) *= mu(0);
+      wt(range(0,nangles-2)) = x(range(1,end));
+      wt(end) = (0.5-sum(wt(range(0,nangles-2))*mu(range(0,nangles-2)))) / mu(end);
     }
     else if (nangles > 1) {
       wt(range(0,nangles-2)) = x(range(nangles,end));
@@ -76,12 +96,19 @@ public:
   typename internal::active_scalar<Real,IsActive>::type calc_cost_function_active(const Array<1,Real,IsActive>& x) {
     Array<1,Real,IsActive> mu(nangles), wt(nangles);
     split_state_vector(x, mu, wt);
-    Array<1,Real,IsActive> y = calc_y(mu, wt);
-    Array<1,Real,IsActive> dy = y - y_ref;
-    //    LOG << "mu=" << mu << "\n";
-    //    LOG << "yref=" << y_ref << "\n";
-    //    LOG << "y=" << y << "\n";
-    typename internal::active_scalar<Real,IsActive>::type cost = 0.5*sum(dy*dy*weight);
+    typename internal::active_scalar<Real,IsActive>::type cost = 0.0;
+    // If prior weight is very large then we skip the (slow) profile
+    // radiative transfer calculations entirely and only use the prior
+    // - this will obviously return the prior unless we are using
+    // integer ratios
+    if (prior_weight < 1.0e10) {
+      Array<1,Real,IsActive> y = calc_y(mu, wt);
+      Array<1,Real,IsActive> dy = y - y_ref;
+      //    LOG << "mu=" << mu << "\n";
+      //    LOG << "yref=" << y_ref << "\n";
+      //    LOG << "y=" << y << "\n";
+      cost += 0.5*sum(dy*dy*weight);
+    }
     if (prior_weight > 0.0) {
       cost += prior_weight * sum((mu-prior_mu)*(mu-prior_mu)
 				      +(wt-prior_wt)*(wt-prior_wt));
@@ -133,7 +160,7 @@ private:
   Vector weight;
   int nangles;
   int iverbose = 1;
-  int integer_ratio = -1;
+  intVector integer_ratios;
 
   // Prior values of nodes and corresponding weights
   Vector prior_mu, prior_wt;

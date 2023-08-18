@@ -59,11 +59,29 @@ main(int argc, const char** argv)
     method_id = "optimization";
   }
 
+  /*
   // Optional forced ratio between nodes in order-2 quadrature
   int integer_ratio = -1;
   if (config.read(integer_ratio, "integer_ratio")) {
     if (integer_ratio < 1) {
       ERROR << "\"integer_ratio\" must be 2 or greater";
+      THROW(PARAMETER_ERROR);
+    }
+  }
+  */
+
+  Matrix tmp_ratios;
+  intMatrix integer_ratios;
+  if (config.read(tmp_ratios, "integer_ratios")) {
+    if (tmp_ratios.size(0) != norder
+	|| tmp_ratios.size(1) != max_order-1) {
+      ERROR << "integer_ratios must be dimensioned [" << norder
+	    << "," << max_order-1 << "]";
+      THROW(PARAMETER_ERROR);
+    }
+    integer_ratios = tmp_ratios;
+    if (any(integer_ratios != tmp_ratios)) {
+      ERROR << "At least one of integer_ratios is not an integer";
       THROW(PARAMETER_ERROR);
     }
   }
@@ -196,6 +214,8 @@ main(int argc, const char** argv)
     prior_weight.resize(orders.size());
     prior_weight = 0.0;
   }
+
+  
   
   Vector y_ref((nlayer+2)*ncol+2);
   // Soft links to y_ref
@@ -279,6 +299,7 @@ main(int argc, const char** argv)
     minimizer.set_max_iterations(20000);
 
     int nx;
+    /*
     if (integer_ratio > 1) {
       if (iorder != 2) {
 	ERROR << "\"integer_ratio\" can only be used when optimizing two angles";
@@ -288,6 +309,13 @@ main(int argc, const char** argv)
       // need to optimize one node and one weight
       nx = 2;
       opt_problem.set_integer_ratio(integer_ratio);
+    }
+    */
+    Vector integer_ratio;
+    if (iorder > 1 && !integer_ratios.empty()) {
+      integer_ratio = integer_ratios(iang,range(0,iorder-2));	
+      opt_problem.set_integer_ratios(integer_ratio);
+      nx = iorder;
     }
     else {
       nx = iorder*2-1;
@@ -311,12 +339,21 @@ main(int argc, const char** argv)
 
     // Index to last mu in state vector
     int imuend = iorder-1;
+    /*
     if (integer_ratio > 1) {
       mu >>= x(range(0,0));
       imuend = 0;
       mu(0) = 1.0/(integer_ratio+1.0);
       wt >>= x(range(1,1));
       wt(0) = 0.5;
+    }
+    */
+    if (iorder > 1 && !integer_ratios.empty()) {
+      mu >>= x(range(0,0));
+      imuend = 0;
+      mu(0) = 1.0/(maxval(integer_ratio)+1.0);
+      wt >>= x(range(imuend+1,end));
+      wt = 0.5 / (mu(0) + mu(0)*sum(integer_ratio));
     }
     else if (use_init_quad) {
       mu >>= x(range(0,iorder-1));
@@ -353,7 +390,12 @@ main(int argc, const char** argv)
     Vector mu_lower = x_lower(range(0,imuend));
     Vector mu_upper = x_upper(range(0,imuend));
     mu_lower = 1.0e-4;
-    mu_upper = 1.0 - 1.0e-4;
+    if (!integer_ratio.empty()) {
+      mu_upper = 1.0/maxval(integer_ratio);
+    }
+    else {
+      mu_upper = 1.0 - 1.0e-4;
+    }
     if (nx > 1) {
       Vector wt_lower = x_lower(range(imuend+1,end));
       Vector wt_upper = x_upper(range(imuend+1,end));

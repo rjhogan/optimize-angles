@@ -4,7 +4,7 @@ Author: Robin Hogan <r.j.hogan@ecmwf.int>
 
 This document was last updated 8 March 2023
 
-## COMPILING AND RUNNNING ECCKD
+## COMPILING AND RUNNNING
 
 The optimize_angles package uses the autotools build system but two
 pre-requisites: the NetCDF C library and the
