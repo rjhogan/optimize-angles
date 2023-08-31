@@ -1,3 +1,17 @@
+// optimize_angles.cpp - Program for optimizing angles in longwave radiative transfer
+//
+// Copyright (C) 2022- ECMWF.
+//
+// This software is licensed under the terms of the Apache Licence Version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+//
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+// Author:  Robin Hogan
+// Email:   r.j.hogan@ecmwf.int
+
 #include <iostream>
 #include <sstream>
 
@@ -457,16 +471,18 @@ main(int argc, const char** argv)
   write_standard_attributes(output,
     "Optimized quadrature angles for longwave radiative transfer");
   output.append_history(argc, argv);
+  output.write("Hogan, R. J., 2023: What are the optimum discrete angles to use in thermal-infrared radiative transfer calculations? Submitted to Q. J. R. Meteorol. Soc. Available from http://www.met.rdg.ac.uk/~swrhgnrj/publications/discrete_ordinate_angles.pdf", "reference");
 
   if (!method_id.empty()) {
     output.write(method_id, "quadrature_method_id");
   }
   output.write("Optimization using clear-sky profiles", "quadrature_method");
   output.write(input_file, "training_file");
-  
+
   std::string config_str;
   config.read(config_str);
   output.write(config_str, "config");
+  output.write("The weights in this file are defined such that to compute an irradiance F from a set of radiances I at discrete angles mu, use F=2*pi*sum(weight*mu*I). The weights w presented in Table 1 of Hogan (2023) may be obtained from w=2*mu*weight.","comment");
   
   output.end_define_mode();
 
