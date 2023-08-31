@@ -4,7 +4,7 @@
 AC_PREREQ([2.63])
 
 # Remember to update the version number for a new release
-AC_INIT([optimize_angles], [0.1], [r.j.hogan@ecmwf.int], [optimize_angles])
+AC_INIT([optimize_angles], [1.0], [r.j.hogan@ecmwf.int], [optimize_angles])
 
 # Most code is C++
 AC_LANG([C++])
@@ -24,8 +24,10 @@ AC_OPENMP
 AC_SUBST(AM_CXXFLAGS,"$OPENMP_CXXFLAGS")
 AC_SUBST(AM_CFLAGS,"$OPENMP_CXXFLAGS")
 
-# Header directories needed during the compilation
-AC_SUBST(AM_CPPFLAGS,"-I../include")
+# Header directories needed during the compilation; also need to run
+# multiple Adept stacks simultaneously requiring the thread-safe
+# option
+AC_SUBST(AM_CPPFLAGS,"-I../include -DADEPT_STORAGE_THREAD_SAFE")
 
 # Check for Adept library, using m4/adept.m4
 AX_CHECK_ADEPT([have_adept=yes], [have_adept=no])
