@@ -1,5 +1,8 @@
-version 0.2
+version 1.0 (31 August 2023)
 	- Added prior_quadrature and prior_weight options
-	
+	- Added REFERENCE files in run/quadrature
+	- Matlab code in plot directory reproduces revised version of
+	  Hogan (2023) paper
+
 version 0.1 (8 March 2023)
 	- First git version
