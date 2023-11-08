@@ -2,7 +2,7 @@
 
 Author: Robin Hogan <r.j.hogan@ecmwf.int>
 
-This document was last updated 31 August 2023
+This document was last updated 8 November 2023
 
 This package computes the optimal angles for longwave atmospheric
 radiative transfer by minimizing errors in a set of clear-sky
@@ -10,10 +10,10 @@ atmospheric profiles. It is an implementation of the algorithm
 described in this paper:
 
 Hogan, R. J., 2023: What are the optimum discrete angles to use in
-thermal-infrared radiative transfer calculations? Submitted to
-Q. J. R. Meteorol. Soc.
-
-The latest version of the paper is available [here](http://www.met.rdg.ac.uk/~swrhgnrj/publications/discrete_ordinate_angles.pdf).
+thermal-infrared radiative transfer calculations?
+*Q. J. R. Meteorol. Soc.,* 1-16,
+[doi:10.1002/qj.4598](https://doi.org/10.1002/qj.4598):
+[PDF](http://www.met.rdg.ac.uk/~swrhgnrj/publications/discrete_ordinate_angles.pdf)
 
 ## COMPILING AND RUNNNING
 
@@ -30,6 +30,7 @@ installed, in which case you can generate the `configure` script with
 Then run
 
 `./configure`
+
 `make`
 
 When running at ECMWF we use the `./configure_ecmwf.sh` script which
